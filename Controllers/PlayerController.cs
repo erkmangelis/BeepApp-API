@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using BeepApp_API.Models;
 using BeepApp_API.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace BeepApp_API.Controllers
 {
@@ -18,34 +19,44 @@ namespace BeepApp_API.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly BeepAppDbContext _context;
+        private readonly UserManager<User> _userManager; // UserManager bağımlılığı eklendi
 
-        public PlayerController(BeepAppDbContext context)
+        public PlayerController(BeepAppDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager; // UserManager bağımlılığı atandı
         }
 
         // GET: api/Player
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
         {
-            return await _context.Players.ToListAsync();
+            // Silinmiş oyuncuları hariç tutarak sorgulama
+            var players = await _context.Players
+                .Where(p => !p.IsDeleted)
+                .ToListAsync();
+
+            return Ok(players);
         }
 
-        // GET: api/Player/id/5
+        // GET: api/Player/id/{id}
         [HttpGet("id/{id}")]
-        public async Task<ActionResult<Player>> GetPlayer(int id)
+        public async Task<ActionResult<Player>> GetPlayer(Guid id)
         {
-            var player = await _context.Players.FindAsync(id);
+            var player = await _context.Players
+                .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
+
             if (player == null)
             {
                 return NotFound();
             }
+
             return Ok(player);
         }
 
         // GET: api/Player/teamId/{teamId}
         [HttpGet("teamId/{teamId}")]
-        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersByTeamId(int teamId)
+        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersByTeamId(Guid teamId)
         {
             // PlayerTeam tablosunda belirtilen teamId ile eşleşen kayıtları al
             var playerTeams = await _context.PlayerTeams
@@ -57,7 +68,7 @@ namespace BeepApp_API.Controllers
 
             // Player tablosundan oyuncuları getir
             var players = await _context.Players
-                .Where(p => playerIds.Contains(p.Id))
+                .Where(p => playerIds.Contains(p.Id) && !p.IsDeleted)
                 .ToListAsync();
 
             if (!players.Any())
@@ -68,83 +79,81 @@ namespace BeepApp_API.Controllers
             return Ok(players);
         }
 
-
-        // GET: api/Player/userId/{userId}
-        [HttpGet("userId/{userId}")]
-        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersByUserId(Guid userId)
+        // GET: api/Player/organization
+        [HttpGet("organization")]
+        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersByOrganization()
         {
-            // İlk olarak, kullanıcının takımlarını al
-            var team = await _context.Teams
-                .Where(t => t.UserId == userId)
-                .FirstOrDefaultAsync();
-
-            if (team == null)
+            // HttpContext.Items üzerinden UserProfile'ı alıyoruz
+            var userProfile = HttpContext.Items["userProfile"] as User; // User modelini kullanıyoruz
+            if (userProfile == null)
             {
-                return NotFound("No team found for the user.");
+                return Unauthorized("UserProfile is null.");
             }
 
-            // Takım ID'sini kullanarak ilgili oyuncuları al
-            var playerTeams = await _context.PlayerTeams
-                .Where(pt => pt.TeamId == team.Id)
-                .ToListAsync();
+            // Kullanıcının organizasyon ID'sini alıyoruz
+            var organizationId = userProfile.OrganizationId;
 
-            // Oyuncuların ID'lerini al
-            var playerIds = playerTeams.Select(pt => pt.PlayerId).ToList();
-
-            // Player tablosundan oyuncuları getir
+            // Organizasyona ait tüm oyuncuları getiriyoruz ve silinmiş oyuncuları dahil etmiyoruz
             var players = await _context.Players
-                .Where(p => playerIds.Contains(p.Id))
+                .Where(p => p.OrganizationId == organizationId && !p.IsDeleted)
                 .ToListAsync();
+
+            if (!players.Any())
+            {
+                return NotFound("No players found for the organization.");
+            }
 
             return Ok(players);
         }
 
 
+
         // POST: api/Player
         [HttpPost]
-        public async Task<ActionResult<Player>> SavePlayer(Player player)
+        public async Task<ActionResult<Player>> SavePlayer([FromBody] Player player)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            if (player == null)
             {
-                return BadRequest("User ID could not be determined.");
+                return BadRequest("Player is null.");
             }
-
-            var team = await _context.Teams.FirstOrDefaultAsync(t => t.UserId == Guid.Parse(userId));
-            if (team == null)
-            {
-                return BadRequest("No team found for the user.");
-            }
-
-            player.CreationDate = DateTime.UtcNow;
-            player.UpdateDate = DateTime.UtcNow;
-
-            _context.Players.Add(player);
 
             try
             {
+                // HttpContext.Items üzerinden UserProfile'ı alıyoruz
+                var userProfile = HttpContext.Items["userProfile"] as User; // User modelini burada kullanıyoruz
+                if (userProfile == null)
+                {
+                    return Unauthorized("UserProfile is null.");
+                }
+
+                // Kullanıcının organizasyon bilgilerini kullanıyoruz
+                var organization = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == userProfile.OrganizationId);
+                if (organization == null)
+                {
+                    return BadRequest("Organization not found.");
+                }
+
+                player.OrganizationId = organization.Id;
+                player.AddedBy = Guid.Parse(userProfile.Id);
+                player.CreatedAt = DateTime.UtcNow;
+                player.UpdatedAt = DateTime.UtcNow;
+                player.IsDeleted = false;
+
+                _context.Players.Add(player);
                 await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player);
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                return Conflict("Could not save player.");
+                // Loglama işlemi yapılabilir
+                return StatusCode(500, "Internal server error");
             }
-
-            var playerTeam = new PlayerTeam
-            {
-                PlayerId = player.Id,
-                TeamId = team.Id
-            };
-            _context.PlayerTeams.Add(playerTeam);
-
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
         }
 
-        // DELETE: api/Player/id/5
+        // DELETE: api/Player/id/{id}
         [HttpDelete("id/{id}")]
-        public async Task<IActionResult> DeletePlayer(int id)
+        public async Task<IActionResult> DeletePlayer(Guid id)
         {
             var player = await _context.Players.FindAsync(id);
             if (player == null)
@@ -152,18 +161,9 @@ namespace BeepApp_API.Controllers
                 return NotFound();
             }
 
-            // PlayerTeam tablosundaki ilgili kaydı sil
-            var playerTeam = await _context.PlayerTeams
-                .Where(pt => pt.PlayerId == id)
-                .ToListAsync();
-
-            if (playerTeam.Any())
-            {
-                _context.PlayerTeams.RemoveRange(playerTeam);
-            }
-
-            // Oyuncuyu sil
-            _context.Players.Remove(player);
+            // Oyuncunun IsDeleted alanını true yap
+            player.IsDeleted = true;
+            _context.Players.Update(player);
             await _context.SaveChangesAsync();
 
             return NoContent();

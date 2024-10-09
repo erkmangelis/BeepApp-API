@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BeepApp-API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+449ef09467a097a3993db6fb71beb70915f0e10a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d928c3a1b53885170b340d56fcfc9f630127028a")]
 [assembly: System.Reflection.AssemblyProductAttribute("BeepApp-API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BeepApp-API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

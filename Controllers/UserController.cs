@@ -24,9 +24,11 @@ namespace BeepApp_API.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
+        private readonly BeepAppDbContext _context;
 
-        public UserController(UserManager<User> userManager)
+        public UserController(BeepAppDbContext context, UserManager<User> userManager)
         {
+            _context = context;
             _userManager = userManager;
         }
 
@@ -102,6 +104,24 @@ namespace BeepApp_API.Controllers
 
             return Ok(user);
         }
+
+        // GET: api/Player/userByOrganizationId/{orgId}
+        [HttpGet("userByOrganizationId/{orgId}")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsersByOrganizationId(int orgId)
+        {
+            // Belirtilen OrgId ile eşleşen kullanıcıları sorguluyoruz
+            var users = await _context.Users
+                .Where(u => u.OrganizationId == orgId && !u.IsDeleted)  // Silinmemiş kullanıcıları getiriyoruz
+                .ToListAsync();
+
+            if (!users.Any())
+            {
+                return NotFound($"No users found for the organization with ID {orgId}.");
+            }
+
+            return Ok(users);
+        }
+
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]

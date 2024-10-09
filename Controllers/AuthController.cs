@@ -46,11 +46,26 @@ namespace BeepApp_API.Controllers
             public string ConfirmPassword { get; set; }
         }
 
+
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+
+            var organization = new Organization
+            {
+                Name = model.Username,
+                IsDeleted = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+
+            _context.Organizations.Add(organization);
+            await _context.SaveChangesAsync();
+
 
             var user = new User
             {
@@ -58,10 +73,12 @@ namespace BeepApp_API.Controllers
                 Email = model.Email,
                 Name = model.Name,
                 Surname = model.Surname,
-
+                OrganizationId = organization.Id,
             };
 
+
             var result = await _userManager.CreateAsync(user, model.Password);
+
 
             if (!result.Succeeded)
             {
@@ -72,8 +89,9 @@ namespace BeepApp_API.Controllers
                 return BadRequest(ModelState);
             }
 
-            return Ok("User registered successfully!");
+            return Ok("User registered and organization created successfully!");
         }
+
 
 
         public class LoginModel

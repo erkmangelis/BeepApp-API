@@ -15,7 +15,6 @@ namespace BeepApp_API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = ApiJwtTokens.ApiAuthScheme)]
-
     public class TeamController : ControllerBase
     {
         private readonly BeepAppDbContext _context;
@@ -29,14 +28,20 @@ namespace BeepApp_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
-            return await _context.Teams.ToListAsync();
+            // IsDeleted false olan takımları döndür
+            return await _context.Teams
+                .Where(t => !t.IsDeleted)
+                .ToListAsync();
         }
 
-        // GET: api/Team/id/5
+        // GET: api/Team/id/{id}
         [HttpGet("id/{id}")]
-        public async Task<ActionResult<Team>> GetTeam(int id)
+        public async Task<ActionResult<Team>> GetTeam(Guid id)
         {
-            var team = await _context.Teams.FindAsync(id);
+            var team = await _context.Teams
+                .Where(t => !t.IsDeleted && t.Id == id)
+                .FirstOrDefaultAsync();
+
             if (team == null)
             {
                 return NotFound();
@@ -44,11 +49,20 @@ namespace BeepApp_API.Controllers
             return Ok(team);
         }
 
-        // GET: api/Team/userId/{userId}
-        [HttpGet("userId/{userId}")]
-        public async Task<ActionResult<IEnumerable<Team>>> GetTeamsByUserId(Guid userId)
+        // GET: api/Team/organizationId/{organizationId}
+        [HttpGet("organizationId/{organizationId}")]
+        public async Task<ActionResult<IEnumerable<Team>>> GetTeamsByOrganizationId(int organizationId)
         {
-            var teams = await _context.Teams.Where(t => t.UserId == userId).ToListAsync();
+            // OrganizationId ile eşleşen silinmemiş takımları döndür
+            var teams = await _context.Teams
+                .Where(t => t.OrganizationId == organizationId && !t.IsDeleted)
+                .ToListAsync();
+
+            if (!teams.Any())
+            {
+                return NotFound($"No teams found for the organization with ID {organizationId}.");
+            }
+
             return Ok(teams);
         }
 
@@ -56,78 +70,66 @@ namespace BeepApp_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Team>> SaveTeam(Team team)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            var userProfile = HttpContext.Items["userProfile"] as User;
+            if (userProfile == null)
             {
-                return BadRequest("User ID could not be determined.");
+                return Unauthorized("User profile could not be determined.");
             }
 
-            team.UserId = Guid.Parse(userId); // UserId'yi takım modeline atayın
+            team.OrganizationId = userProfile.OrganizationId; // OrganizationId'yi kullanıcıya göre ayarla
+            team.CreatedAt = DateTime.UtcNow;
+            team.UpdatedAt = DateTime.UtcNow;
 
-            if (team.Id == 0)
-            {
-                _context.Teams.Add(team);
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateException)
-                {
-                    if (TeamExists(team.Id))
-                    {
-                        return Conflict();
-                    }
-                    else
-                    {
-                        throw; // Hata durumunda detaylı bilgi için exception fırlatılıyor.
-                    }
-                }
-                return CreatedAtAction("GetTeam", new { id = team.Id }, team);
-            }
-            else
-            {
-                var existingTeam = await _context.Teams.FindAsync(team.Id);
-                if (existingTeam == null)
-                {
-                    return NotFound();
-                }
-                _context.Entry(existingTeam).CurrentValues.SetValues(team);
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TeamExists(team.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw; // Hata durumunda detaylı bilgi için exception fırlatılıyor.
-                    }
-                }
-                return NoContent();
-            }
+            _context.Teams.Add(team);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTeam", new { id = team.Id }, team);
         }
 
-        // DELETE: api/Team/id/5
-        [HttpDelete("id/{id}")]
-        public async Task<IActionResult> DeleteTeam(int id)
+        // PUT: api/Team/id/{id}
+        [HttpPut("id/{id}")]
+        public async Task<IActionResult> UpdateTeam(Guid id, Team updatedTeam)
         {
-            var team = await _context.Teams.FindAsync(id);
-            if (team == null)
+            if (id != updatedTeam.Id)
             {
-                return NotFound();
+                return BadRequest("Team ID mismatch.");
             }
-            _context.Teams.Remove(team);
+
+            var existingTeam = await _context.Teams.FindAsync(id);
+            if (existingTeam == null || existingTeam.IsDeleted)
+            {
+                return NotFound("Team not found.");
+            }
+
+            existingTeam.Name = updatedTeam.Name;
+            existingTeam.UpdatedAt = DateTime.UtcNow;
+            _context.Entry(existingTeam).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        private bool TeamExists(int id)
+        // DELETE: api/Team/id/{id}
+        [HttpDelete("id/{id}")]
+        public async Task<IActionResult> DeleteTeam(Guid id)
         {
-            return _context.Teams.Any(t => t.Id == id);
+            var team = await _context.Teams.FindAsync(id);
+            if (team == null || team.IsDeleted)
+            {
+                return NotFound("Team not found.");
+            }
+
+            // Silme yerine IsDeleted'i true yapıyoruz
+            team.IsDeleted = true;
+            _context.Entry(team).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool TeamExists(Guid id)
+        {
+            return _context.Teams.Any(t => t.Id == id && !t.IsDeleted);
         }
     }
 }

@@ -9,11 +9,11 @@ namespace BeepApp_API.Models
         public int Id { get; set; }
 
         [ForeignKey("Player")]
-        public int PlayerId { get; set; }
+        public Guid PlayerId { get; set; }
         public virtual Player Player { get; set; }
 
         [ForeignKey("Team")]
-        public int TeamId { get; set; }
+        public Guid TeamId { get; set; }
         public virtual Team Team { get; set; }
     }
 }

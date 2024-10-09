@@ -5,24 +5,32 @@ namespace BeepApp_API.Models
 {
     public enum TestMode
     {
-        test1,
-        test2,
-        test3
+        YoyoTab = 1,
+        MASTab = 2,
+        ShuttleRunTab = 3,
+        DefenceOffenceTab = 4,
+        ConconiTab = 5
     }
+
 
     public class Test
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [ForeignKey("Players")]
-        public int PlayerId { get; set; }
+        public Guid PlayerId { get; set; }
+        public Player Player { get; set; }
 
-        public double v02Max { get; set; }
+        [ForeignKey("Organizations")]
+        public Guid OrganizationId { get; set; }
+        public Organization Organization { get; set; }
+
+        public double vo2Max { get; set; }
         public double Speed { get; set; }
         public double Distance { get; set; }
         public string Score { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTime CreatedAt { get; set; }
         public TestMode TestMode { get; set; }
     }
 }

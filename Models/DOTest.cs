@@ -6,15 +6,15 @@ namespace BeepApp_API.Models
     public class DOTest
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [ForeignKey("Players")]
-        public int PlayerId { get; set; }
+        public Guid PlayerId { get; set; }
 
         public double DefenceAvg { get; set; }
         public double OffenceAvg { get; set; }
         public double DefenceListLength { get; set; }
         public double OffenceListLength { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

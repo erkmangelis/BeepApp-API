@@ -16,6 +16,7 @@ namespace BeepApp_API.Data
         {
         }
 
+        public DbSet<Organization> Organizations { get; set; }
         public DbSet<DOTest> DOTests { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerTeam> PlayerTeams { get; set; }

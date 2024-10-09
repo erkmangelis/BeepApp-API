@@ -7,16 +7,17 @@ namespace BeepApp_API.Models
     {
         [Key]
         [Required]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         public string Name { get; set; }
 
-        [ForeignKey("Users")]
-        public Guid UserId { get; set; }
+        [ForeignKey("Organization")]
+        public int OrganizationId { get; set; }
+        public Organization Organization { get; set; }
 
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; } = false;

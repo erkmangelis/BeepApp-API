@@ -29,28 +29,44 @@ namespace BeepApp_API.Controllers
             return Ok(tests);
         }
 
-        // GET: api/test/userId/{userId}
-        [HttpGet("userId/{userId}")]
-        public async Task<ActionResult<IEnumerable<Test>>> GetTestsByUserId(Guid userId)
+        // GET: api/test/userId
+        [HttpGet("userId")]
+        public async Task<ActionResult<IEnumerable<Test>>> GetTestsByUserProfile()
         {
-            // Kullanıcının takımlarını al
-            var teamIds = await _context.Teams
-                .Where(t => t.UserId == userId)
-                .Select(t => t.Id)
-                .ToListAsync();
+            try
+            {
+                // HttpContext.Items üzerinden UserProfile'ı alıyoruz
+                var userProfile = HttpContext.Items["userProfile"] as User;
+                if (userProfile == null)
+                {
+                    return Unauthorized("UserProfile is null.");
+                }
 
-            // Takımların oyuncularını al
-            var playerIds = await _context.PlayerTeams
-                .Where(pt => teamIds.Contains(pt.TeamId)) // TeamId'leri ile eşleşen oyuncular
-                .Select(pt => pt.PlayerId)
-                .ToListAsync();
+                // Kullanıcının organizasyon bilgilerini kullanıyoruz
+                var organization = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == userProfile.OrganizationId);
+                if (organization == null)
+                {
+                    return BadRequest("Organization not found.");
+                }
 
-            // Eşleşen PlayerId'li testleri al
-            var tests = await _context.Tests
-                .Where(t => playerIds.Contains(t.PlayerId))
-                .ToListAsync();
+                // Organizasyona ait oyuncuları al
+                var playerIds = await _context.Players
+                    .Where(p => p.OrganizationId == organization.Id && !p.IsDeleted)
+                    .Select(p => p.Id)
+                    .ToListAsync();
 
-            return Ok(tests);
+                // Bu oyunculara ait testleri al
+                var tests = await _context.Tests
+                    .Where(t => playerIds.Contains(t.PlayerId))
+                    .ToListAsync();
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                // Loglama işlemi yapılabilir
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // GET: api/test/{id}
@@ -69,7 +85,7 @@ namespace BeepApp_API.Controllers
 
         // GET: api/test/playerId/{playerId}
         [HttpGet("playerId/{playerId}")]
-        public async Task<ActionResult<IEnumerable<Test>>> GetTestsByPlayerId(int playerId)
+        public async Task<ActionResult<IEnumerable<Test>>> GetTestsByPlayerId(Guid playerId)
         {
             var tests = await _context.Tests
                 .Where(t => t.PlayerId == playerId) // Eşleşen PlayerId'li testleri al
