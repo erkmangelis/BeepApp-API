@@ -74,6 +74,9 @@ namespace BeepApp_API.Controllers
                 Name = model.Name,
                 Surname = model.Surname,
                 OrganizationId = organization.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
             };
 
 

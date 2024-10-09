@@ -112,6 +112,16 @@ namespace BeepApp_API.Controllers
             // Belirtilen OrgId ile eşleşen kullanıcıları sorguluyoruz
             var users = await _context.Users
                 .Where(u => u.OrganizationId == orgId && !u.IsDeleted)  // Silinmemiş kullanıcıları getiriyoruz
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    UserName = u.UserName,
+                    Email = u.Email,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    CreatedAt = u.CreatedAt,
+                    UpdatedAt = u.UpdatedAt
+                })
                 .ToListAsync();
 
             if (!users.Any())

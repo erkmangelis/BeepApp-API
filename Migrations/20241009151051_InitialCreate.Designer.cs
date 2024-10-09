@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BeepApp_API.Migrations
 {
     [DbContext(typeof(BeepAppDbContext))]
-    [Migration("20241009125055_InitialCreate")]
+    [Migration("20241009151051_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -114,8 +114,6 @@ namespace BeepApp_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizationId");
-
                     b.ToTable("Players");
                 });
 
@@ -166,8 +164,6 @@ namespace BeepApp_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizationId");
-
                     b.ToTable("Teams");
                 });
 
@@ -186,9 +182,6 @@ namespace BeepApp_API.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("OrganizationId1")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uuid");
 
@@ -206,10 +199,6 @@ namespace BeepApp_API.Migrations
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId1");
-
-                    b.HasIndex("PlayerId");
 
                     b.ToTable("Tests");
                 });
@@ -282,9 +271,6 @@ namespace BeepApp_API.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -297,8 +283,6 @@ namespace BeepApp_API.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("OrganizationId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -459,17 +443,6 @@ namespace BeepApp_API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BeepApp_API.Models.Player", b =>
-                {
-                    b.HasOne("BeepApp_API.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
             modelBuilder.Entity("BeepApp_API.Models.PlayerTeam", b =>
                 {
                     b.HasOne("BeepApp_API.Models.Player", "Player")
@@ -487,47 +460,6 @@ namespace BeepApp_API.Migrations
                     b.Navigation("Player");
 
                     b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("BeepApp_API.Models.Team", b =>
-                {
-                    b.HasOne("BeepApp_API.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("BeepApp_API.Models.Test", b =>
-                {
-                    b.HasOne("BeepApp_API.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BeepApp_API.Models.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("BeepApp_API.Models.User", b =>
-                {
-                    b.HasOne("BeepApp_API.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

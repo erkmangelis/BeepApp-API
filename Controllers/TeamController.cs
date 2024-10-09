@@ -70,10 +70,17 @@ namespace BeepApp_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Team>> SaveTeam(Team team)
         {
-            var userProfile = HttpContext.Items["userProfile"] as User;
+            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found.");
+            }
+
+            // Kullanıcıyı UserId ile buluyoruz
+            var userProfile = await _context.Users.FindAsync(userId);
             if (userProfile == null)
             {
-                return Unauthorized("User profile could not be determined.");
+                return Unauthorized("User not found.");
             }
 
             team.OrganizationId = userProfile.OrganizationId; // OrganizationId'yi kullanıcıya göre ayarla

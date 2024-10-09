@@ -19,12 +19,10 @@ namespace BeepApp_API.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly BeepAppDbContext _context;
-        private readonly UserManager<User> _userManager; // UserManager bağımlılığı eklendi
 
-        public PlayerController(BeepAppDbContext context, UserManager<User> userManager)
+        public PlayerController(BeepAppDbContext context)
         {
             _context = context;
-            _userManager = userManager; // UserManager bağımlılığı atandı
         }
 
         // GET: api/Player
@@ -83,11 +81,17 @@ namespace BeepApp_API.Controllers
         [HttpGet("organization")]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayersByOrganization()
         {
-            // HttpContext.Items üzerinden UserProfile'ı alıyoruz
-            var userProfile = HttpContext.Items["userProfile"] as User; // User modelini kullanıyoruz
+            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found.");
+            }
+
+            // Kullanıcıyı UserId ile buluyoruz
+            var userProfile = await _context.Users.FindAsync(userId);
             if (userProfile == null)
             {
-                return Unauthorized("UserProfile is null.");
+                return Unauthorized("User not found.");
             }
 
             // Kullanıcının organizasyon ID'sini alıyoruz
@@ -119,37 +123,48 @@ namespace BeepApp_API.Controllers
 
             try
             {
-                // HttpContext.Items üzerinden UserProfile'ı alıyoruz
-                var userProfile = HttpContext.Items["userProfile"] as User; // User modelini burada kullanıyoruz
-                if (userProfile == null)
+                // Kullanıcının UserId'sini HttpContext'ten alıyoruz
+                var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized("UserProfile is null.");
+                    return Unauthorized("User ID not found.");
                 }
 
-                // Kullanıcının organizasyon bilgilerini kullanıyoruz
+                // Kullanıcıyı UserId ile buluyoruz
+                var userProfile = await _context.Users.FindAsync(userId);
+                if (userProfile == null)
+                {
+                    return Unauthorized("User not found.");
+                }
+
+                // Kullanıcının organizasyon bilgilerini alıyoruz
                 var organization = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == userProfile.OrganizationId);
                 if (organization == null)
                 {
                     return BadRequest("Organization not found.");
                 }
 
-                player.OrganizationId = organization.Id;
-                player.AddedBy = Guid.Parse(userProfile.Id);
-                player.CreatedAt = DateTime.UtcNow;
-                player.UpdatedAt = DateTime.UtcNow;
-                player.IsDeleted = false;
+                // Player nesnesini dolduruyoruz
+                player.OrganizationId = organization.Id; // Organizasyon ID'sini ayarlıyoruz
+                player.AddedBy = Guid.Parse(userProfile.Id); // Kullanıcının ID'sini alıyoruz
+                player.CreatedAt = DateTime.UtcNow; // Oluşturulma zamanını ayarlıyoruz
+                player.UpdatedAt = DateTime.UtcNow; // Güncellenme zamanını ayarlıyoruz
+                player.IsDeleted = false; // Silinmediğini belirtiyoruz
 
-                _context.Players.Add(player);
-                await _context.SaveChangesAsync();
+                // Oyuncuyu veritabanına ekliyoruz
+                await _context.Players.AddAsync(player);
+                await _context.SaveChangesAsync(); // Değişiklikleri kaydediyoruz
 
-                return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player);
+                return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player); // Başarı durumunda 201 döndürüyoruz
             }
             catch (Exception ex)
             {
                 // Loglama işlemi yapılabilir
+                // Örneğin: _logger.LogError(ex, "An error occurred while saving the player.");
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         // DELETE: api/Player/id/{id}
         [HttpDelete("id/{id}")]

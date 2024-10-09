@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BeepApp_API.Models;
 using BeepApp_API.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace BeepApp_API.Controllers
 {
@@ -36,10 +37,17 @@ namespace BeepApp_API.Controllers
             try
             {
                 // HttpContext.Items üzerinden UserProfile'ı alıyoruz
-                var userProfile = HttpContext.Items["userProfile"] as User;
+                var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found.");
+                }
+
+                // Kullanıcıyı UserId ile buluyoruz
+                var userProfile = await _context.Users.FindAsync(userId);
                 if (userProfile == null)
                 {
-                    return Unauthorized("UserProfile is null.");
+                    return Unauthorized("User not found.");
                 }
 
                 // Kullanıcının organizasyon bilgilerini kullanıyoruz
@@ -71,7 +79,7 @@ namespace BeepApp_API.Controllers
 
         // GET: api/test/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Test>> GetTestById(int id)
+        public async Task<ActionResult<Test>> GetTestById(Guid id)
         {
             var test = await _context.Tests.FindAsync(id);
 

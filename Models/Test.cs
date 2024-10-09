@@ -20,11 +20,9 @@ namespace BeepApp_API.Models
 
         [ForeignKey("Players")]
         public Guid PlayerId { get; set; }
-        public Player Player { get; set; }
 
         [ForeignKey("Organizations")]
         public Guid OrganizationId { get; set; }
-        public Organization Organization { get; set; }
 
         public double vo2Max { get; set; }
         public double Speed { get; set; }

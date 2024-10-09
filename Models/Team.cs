@@ -14,7 +14,6 @@ namespace BeepApp_API.Models
 
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
-        public Organization Organization { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

@@ -10,7 +10,6 @@ namespace BeepApp_API.Models
 
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
-        public Organization Organization { get; set; }
 
         public Guid AddedBy { get; set; }
 
