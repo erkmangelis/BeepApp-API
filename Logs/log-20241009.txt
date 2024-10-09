@@ -1,0 +1,54 @@
+2024-10-09 09:59:32.542 +03:00 [INF] Starting up
+2024-10-09 09:59:33.866 +03:00 [DBG] Hosting starting
+2024-10-09 09:59:33.918 +03:00 [INF] User profile is available. Using 'C:\Users\HP\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2024-10-09 09:59:33.962 +03:00 [DBG] Reading data from file 'C:\Users\HP\AppData\Local\ASP.NET\DataProtection-Keys\key-69267a7c-932e-4609-b484-00f22063131f.xml'.
+2024-10-09 09:59:33.981 +03:00 [DBG] Found key {69267a7c-932e-4609-b484-00f22063131f}.
+2024-10-09 09:59:33.988 +03:00 [DBG] Considering key {69267a7c-932e-4609-b484-00f22063131f} with expiration date 2024-12-26 07:37:57Z as default key.
+2024-10-09 09:59:33.993 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2024-10-09 09:59:33.995 +03:00 [DBG] Decrypting secret element using Windows DPAPI.
+2024-10-09 09:59:33.997 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2024-10-09 09:59:34.001 +03:00 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2024-10-09 09:59:34.004 +03:00 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2024-10-09 09:59:34.006 +03:00 [DBG] Using key {69267a7c-932e-4609-b484-00f22063131f} as the default key.
+2024-10-09 09:59:34.008 +03:00 [DBG] Key ring with default key {69267a7c-932e-4609-b484-00f22063131f} was loaded during application startup.
+2024-10-09 09:59:34.229 +03:00 [DBG] Registered model binder providers, in the following order: ["Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BinderTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ServicesModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.HeaderModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FloatingPointTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.EnumTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DateTimeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.SimpleTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.TryParseModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CancellationTokenModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ByteArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormFileModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormCollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.KeyValuePairModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DictionaryModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ComplexObjectModelBinderProvider"]
+2024-10-09 09:59:34.298 +03:00 [WRN] The WebRootPath was not found: C:\Users\HP\source\repos\BeepApp-API\BeepApp-API\wwwroot. Static files may be unavailable.
+2024-10-09 09:59:34.429 +03:00 [INF] Now listening on: https://0.0.0.0:5280
+2024-10-09 09:59:34.430 +03:00 [DBG] Loaded hosting startup assembly BeepApp-API
+2024-10-09 09:59:34.431 +03:00 [DBG] Loaded hosting startup assembly Microsoft.WebTools.ApiEndpointDiscovery
+2024-10-09 09:59:34.432 +03:00 [DBG] Loaded hosting startup assembly Microsoft.AspNetCore.Watch.BrowserRefresh
+2024-10-09 09:59:34.433 +03:00 [DBG] Loaded hosting startup assembly Microsoft.WebTools.BrowserLink.Net
+2024-10-09 09:59:34.457 +03:00 [DBG] Connection id "0HN785VNA6VA5" accepted.
+2024-10-09 09:59:34.460 +03:00 [DBG] Connection id "0HN785VNA6VA5" started.
+2024-10-09 09:59:34.469 +03:00 [DBG] Connection id "0HN785VNA6VA5" received FIN.
+2024-10-09 09:59:34.477 +03:00 [DBG] Failed to authenticate HTTPS connection.
+System.IO.IOException: Received an unexpected EOF or 0 bytes from the transport stream.
+   at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.ProcessAuthenticationWithTelemetryAsync(Boolean isAsync, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Https.Internal.HttpsConnectionMiddleware.OnConnectionAsync(ConnectionContext context)
+2024-10-09 09:59:34.494 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-10-09 09:59:34.533 +03:00 [INF] Hosting environment: Development
+2024-10-09 09:59:34.534 +03:00 [DBG] Connection id "0HN785VNA6VA5" stopped.
+2024-10-09 09:59:34.534 +03:00 [INF] Content root path: C:\Users\HP\source\repos\BeepApp-API\BeepApp-API
+2024-10-09 09:59:34.538 +03:00 [DBG] Connection id "0HN785VNA6VA5" sending FIN because: "The Socket transport's send loop completed gracefully."
+2024-10-09 09:59:34.538 +03:00 [DBG] Hosting started
+2024-10-09 09:59:35.034 +03:00 [DBG] Connection id "0HN785VNA6VA6" accepted.
+2024-10-09 09:59:35.036 +03:00 [DBG] Connection id "0HN785VNA6VA6" started.
+2024-10-09 09:59:35.062 +03:00 [DBG] Connection 0HN785VNA6VA6 established using the following protocol: "Tls13"
+2024-10-09 09:59:35.113 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5280/swagger/index.html - null null
+2024-10-09 09:59:35.213 +03:00 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2024-10-09 09:59:35.256 +03:00 [DBG] Response markup is scheduled to include Browser Link script injection.
+2024-10-09 09:59:35.259 +03:00 [DBG] Response markup is scheduled to include browser refresh script injection.
+2024-10-09 09:59:35.273 +03:00 [DBG] Response markup was updated to include Browser Link script injection.
+2024-10-09 09:59:35.275 +03:00 [DBG] Response markup was updated to include browser refresh script injection.
+2024-10-09 09:59:35.280 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5280/swagger/index.html - 200 null text/html;charset=utf-8 169.6246ms
+2024-10-09 09:59:35.286 +03:00 [DBG] Connection id "0HN785VNA6VA7" accepted.
+2024-10-09 09:59:35.288 +03:00 [DBG] Connection id "0HN785VNA6VA7" started.
+2024-10-09 09:59:35.293 +03:00 [DBG] Connection 0HN785VNA6VA7 established using the following protocol: "Tls13"
+2024-10-09 09:59:35.294 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5280/_framework/aspnetcore-browser-refresh.js - null null
+2024-10-09 09:59:35.295 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5280/_vs/browserLink - null null
+2024-10-09 09:59:35.345 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5280/_framework/aspnetcore-browser-refresh.js - 200 13758 application/javascript; charset=utf-8 50.7094ms
+2024-10-09 09:59:35.418 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5280/_vs/browserLink - 200 null text/javascript; charset=UTF-8 123.2514ms
+2024-10-09 09:59:35.460 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5280/swagger/v1/swagger.json - null null
+2024-10-09 09:59:35.569 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5280/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 109.5541ms
