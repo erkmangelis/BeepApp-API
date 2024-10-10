@@ -10,10 +10,8 @@ namespace BeepApp_API.Models
 
         [ForeignKey("Player")]
         public Guid PlayerId { get; set; }
-        public virtual Player Player { get; set; }
 
         [ForeignKey("Team")]
         public Guid TeamId { get; set; }
-        public virtual Team Team { get; set; }
     }
 }

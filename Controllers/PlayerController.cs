@@ -145,17 +145,17 @@ namespace BeepApp_API.Controllers
                 }
 
                 // Player nesnesini dolduruyoruz
-                player.OrganizationId = organization.Id; // Organizasyon ID'sini ayarlıyoruz
-                player.AddedBy = Guid.Parse(userProfile.Id); // Kullanıcının ID'sini alıyoruz
-                player.CreatedAt = DateTime.UtcNow; // Oluşturulma zamanını ayarlıyoruz
-                player.UpdatedAt = DateTime.UtcNow; // Güncellenme zamanını ayarlıyoruz
-                player.IsDeleted = false; // Silinmediğini belirtiyoruz
+                player.OrganizationId = organization.Id;
+                player.AddedBy = Guid.Parse(userProfile.Id);
+                player.CreatedAt = DateTime.UtcNow;
+                player.UpdatedAt = DateTime.UtcNow;
+                player.IsDeleted = false;
 
                 // Oyuncuyu veritabanına ekliyoruz
                 await _context.Players.AddAsync(player);
-                await _context.SaveChangesAsync(); // Değişiklikleri kaydediyoruz
+                await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player); // Başarı durumunda 201 döndürüyoruz
+                return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player);
             }
             catch (Exception ex)
             {

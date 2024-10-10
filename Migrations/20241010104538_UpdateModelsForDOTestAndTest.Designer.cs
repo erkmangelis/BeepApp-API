@@ -3,6 +3,7 @@ using System;
 using BeepApp_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BeepApp_API.Migrations
 {
     [DbContext(typeof(BeepAppDbContext))]
-    partial class BeepAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241010104538_UpdateModelsForDOTestAndTest")]
+    partial class UpdateModelsForDOTestAndTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

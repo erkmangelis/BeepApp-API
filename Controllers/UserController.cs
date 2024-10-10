@@ -18,6 +18,17 @@ namespace BeepApp_API.Controllers
         public DateTime UpdatedAt { get; set; }
     }
 
+    public class UpdateUserDTO
+    {
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public bool? IsDeleted { get; set; }
+        
+    }
+
+
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = ApiJwtTokens.ApiAuthScheme)]
@@ -135,19 +146,22 @@ namespace BeepApp_API.Controllers
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UpdateUserModel updatedUser)
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserDTO updatedUser)
         {
             var user = await _userManager.FindByIdAsync(id);
 
-            if (user == null || user.IsDeleted)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            // Kullanıcı bilgilerini güncelle
-            user.UserName = updatedUser.Username;
-            user.Email = updatedUser.Email;
-            // Diğer güncellemeler burada yapılabilir
+            // Güncellenen alanlar doluysa güncelle, dolu değilse mevcut değerleri koru
+            user.UserName = !string.IsNullOrEmpty(updatedUser.Username) ? updatedUser.Username : user.UserName;
+            user.Email = !string.IsNullOrEmpty(updatedUser.Email) ? updatedUser.Email : user.Email;
+            user.Name = !string.IsNullOrEmpty(updatedUser.Name) ? updatedUser.Name : user.Name;
+            user.Surname = !string.IsNullOrEmpty(updatedUser.Surname) ? updatedUser.Surname : user.Surname;
+            user.IsDeleted = updatedUser.IsDeleted ?? user.IsDeleted;
+            user.UpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
 
@@ -158,6 +172,8 @@ namespace BeepApp_API.Controllers
 
             return NoContent();
         }
+
+
 
         // DELETE: api/user/{id}
         [HttpDelete("{id}")]
@@ -172,6 +188,7 @@ namespace BeepApp_API.Controllers
 
             // IsDeleted alanını true yapıyoruz
             user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
 

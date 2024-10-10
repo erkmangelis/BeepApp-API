@@ -24,6 +24,12 @@ namespace BeepApp_API.Controllers
             _context = context;
         }
 
+        public class UpdateTeamDTO
+        {
+            public string Name { get; set; }
+            public bool? IsDeleted { get; set; }
+        }
+
         // GET: api/Team
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
@@ -95,26 +101,29 @@ namespace BeepApp_API.Controllers
 
         // PUT: api/Team/id/{id}
         [HttpPut("id/{id}")]
-        public async Task<IActionResult> UpdateTeam(Guid id, Team updatedTeam)
+        public async Task<IActionResult> UpdateTeam(Guid id, UpdateTeamDTO updatedTeamDto)
         {
-            if (id != updatedTeam.Id)
-            {
-                return BadRequest("Team ID mismatch.");
-            }
 
-            var existingTeam = await _context.Teams.FindAsync(id);
-            if (existingTeam == null || existingTeam.IsDeleted)
+            var team = await _context.Teams.FindAsync(id);
+            if (team == null)
             {
                 return NotFound("Team not found.");
             }
 
-            existingTeam.Name = updatedTeam.Name;
-            existingTeam.UpdatedAt = DateTime.UtcNow;
-            _context.Entry(existingTeam).State = EntityState.Modified;
+            if (!string.IsNullOrEmpty(updatedTeamDto.Name))
+            {
+                team.Name = updatedTeamDto.Name;
+            }
+
+            team.IsDeleted = updatedTeamDto.IsDeleted ?? team.IsDeleted;
+
+            team.UpdatedAt = DateTime.UtcNow;
+            _context.Entry(team).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
 
         // DELETE: api/Team/id/{id}
         [HttpDelete("id/{id}")]
@@ -128,6 +137,7 @@ namespace BeepApp_API.Controllers
 
             // Silme yerine IsDeleted'i true yapıyoruz
             team.IsDeleted = true;
+            team.UpdatedAt = DateTime.UtcNow;
             _context.Entry(team).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 

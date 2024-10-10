@@ -11,6 +11,9 @@ namespace BeepApp_API.Models
         [ForeignKey("Players")]
         public Guid PlayerId { get; set; }
 
+        [ForeignKey("Organizations")]
+        public int OrganizationId { get; set; }
+
         public double DefenceAvg { get; set; }
         public double OffenceAvg { get; set; }
         public double DefenceListLength { get; set; }
